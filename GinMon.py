@@ -5,6 +5,7 @@
 # --------------------------------------------------
 import configparser
 import hashlib
+import sys
 import urllib
 from xml.etree import ElementTree as ET
 import datetime
@@ -14,7 +15,7 @@ import requests
 
 # Import config file
 config = configparser.RawConfigParser(allow_no_value=True)
-config.read("config.ini")
+config.read(sys.argv[1])
 
 # Ginlong config
 baseURL = 'http://www.ginlongmonitoring.com:10000'  # base url
