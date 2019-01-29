@@ -10,6 +10,10 @@ Create a cron job for the script to run
 
 ```*/30 * * * * /usr/bin/python3 <PATH TO GinMon.py> >/dev/null 2>&1```
 
+Options:
+
+```-c``` is used to manually set the location of the config file (default: projectdir/config.ini)
+
 ### ToDo
 - [ ] Add domoticz support
 - [ ] Add database support

@@ -5,17 +5,29 @@
 # --------------------------------------------------
 import configparser
 import hashlib
+import os
 import sys
 import urllib
 from xml.etree import ElementTree as ET
 import datetime
 from time import strftime
-
+import argparse
 import requests
+
+prog_path = os.path.dirname(os.path.abspath(__file__))
 
 # Import config file
 config = configparser.RawConfigParser(allow_no_value=True)
-config.read(sys.argv[1])
+parser = argparse.ArgumentParser()
+parser.add_argument("-c", "--config", help="Config location")
+args = parser.parse_args()
+if args.config:
+    print("config from argument loaded")
+    print(args.config)
+    config.read(args.config)
+else:
+    config.read(prog_path + "/config.ini")
+
 
 # Ginlong config
 baseURL = 'http://www.ginlongmonitoring.com:10000'  # base url
