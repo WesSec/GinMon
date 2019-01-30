@@ -5,8 +5,18 @@ Note: The script is far from finished but it does 'work'.
 ## Installation
 ```git clone https://github.com/wessel145/GinMon.git```  
 
-Rename the file config-default.ini to config.ini and add your parameters in the config file
-Create a cron job for the script to run  
+- Rename the file config-default.ini to config.ini and add your parameters in the config file
+
+- To retrieve deviceID in the ginlong section  
+  - Log in at m.ginlong.com
+  - Visit http://m.ginlong.com/cpro/epc/plantview/view/doPlantList.json and look for "plantId"
+  - Visit http://m.ginlong.com/cpro/epc/plantDevice/inverterListAjax.json?plantId=YOURPLANTID
+  - Look for "deviceID"
+
+- First run the script manually to check if it is working correctly
+```python3 GinMon.py```
+
+- Create a cron job for the script to run  
 
 ```*/15 * * * * /usr/bin/python3 <PATH TO GinMon.py> >/dev/null 2>&1```
 
@@ -22,3 +32,4 @@ Options:
 - [ ] Add database support
 - [x] Log more data
 - [x] Save timestamp and only log new data
+- [ ] Setup script to retrieve deviceID for inverter
