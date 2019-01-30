@@ -15,11 +15,10 @@ Options:
 ```-c``` is used to manually set the location of the config file (default: projectdir/config.ini)
 
 ### Features
-- Only logs data when data is newer than x minutes, Ginlong inverters tend to upload new data ever 10 minutes when active, 
-when no energy is generated for longer than 20 minutes no new data will be uploaded
+- Checks if new data is available on the ginglong server, script aborts when data is same as previous upload. (lastlog.txt is created for storing this data, modifying it may break the script)
 
 ### ToDo
 - [ ] Add domoticz support
 - [ ] Add database support
 - [x] Log more data
-- [ ] Save timestamp and only log new data
+- [x] Save timestamp and only log new data

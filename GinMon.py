@@ -2,7 +2,6 @@ import argparse
 import configparser
 import os
 import sys
-import time
 from time import strftime
 
 import requests
@@ -49,16 +48,20 @@ def GetData(deviceID):
 
 
 def CheckActivity(updatetime):
-    if config.get('Ginlong', 'idle_minutes'):
-        threshold = config.get('Ginlong', 'idle_minutes')
-        # Reformat epoch times
-        uptime = int((str(updatetime)[0:10]))
-        now = int(time.time())
-        # Calculate difference between last upload and now
-        diff = (now - uptime) / 60
-        if diff > 20:
-            print("Last update longer than ", threshold, " Minutes ago. Data will not be logged.")
+    if not os.path.isfile('lastlog.txt'):
+        wr = open("lastlog.txt", "w+")
+        wr.write(str(updatetime))
+    else:
+        wr = open("lastlog.txt", 'r+')
+        lastdata = wr.readline()
+        if int(lastdata) == updatetime:
+            print("No new data found on server, sun is probably down")
             Exit()
+        else:
+            wr.seek(0)
+            wr.write(str(updatetime))
+            wr.truncate()
+            wr.close()
 
 
 def ParseData(json):
@@ -134,6 +137,9 @@ def Exit():
 # Base URLs and
 BaseURL = "http://m.ginlong.com"
 
+# Project directory
+prog_path = os.path.dirname(os.path.abspath(__file__))
+
 # Create session for requests
 session = requests.session()
 
@@ -149,7 +155,6 @@ if args.config:
     print(args.config)
     config.read(args.config)
 else:
-    prog_path = os.path.dirname(os.path.abspath(__file__))
     config.read(prog_path + "/config.ini")
 
 print("Welcome to Ginlong monitoring tool v2 by wessel145")
