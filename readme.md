@@ -3,7 +3,8 @@ Script for parsing data from m.ginlong.com and use it elsewhere (currently only 
 Note: The script is far from finished but it does 'work'. 
 
 ## Installation
-```git clone https://github.com/wessel145/GinMon.git```  
+```git clone https://github.com/wessel145/GinMon.git```   
+```cd GinMon && pip3 install -r requirements.txt  ```
 
 - Rename the file config-default.ini to config.ini and add your parameters in the config file
 
