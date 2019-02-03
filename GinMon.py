@@ -6,6 +6,29 @@ from time import strftime
 
 import requests
 
+# Ginlong output keys
+gindict = {"1a": "DCVPV1",
+           "1b": "DCVPV2",
+           '1c': "DCVPV3",
+           '1d': "DCVPV4",
+           '1j': "DCCUR1",
+           '1k': "DCCUR2",
+           '1l': "DCCUR3",
+           '1m': "DCCUR4",
+           '1af': "ACVOL1",
+           '1ag': "ACVOL2",
+           '1ah': "ACVOL3",
+           '1ai': "ACCUR1",
+           '1aj': "ACCUR2",
+           '1ak': "ACCUR3",
+           '1ao': "ACWATT",
+           '1ar': "ACFREQ",
+           '1bd': "DAYGEN",
+           '1be': "MONGEN",
+           '1bf': "ANNGEN",
+           '1bc': "TOTGEN",
+           '1df': "INVTMP"}
+
 
 # Functions
 
@@ -66,33 +89,17 @@ def CheckActivity(updatetime):
 
 def ParseData(json):
     # Parse all the data from the Json
-    Data = {'SN': json['result']['deviceWapper']['sn'],
-            'Plantname': json['result']['deviceWapper']['plantName'],  # Plantname
-            'Updatetime': json['result']['deviceWapper']['updateDate'],  # Last update (epoch)
-            'DCVPV1': json['result']['deviceWapper']['realTimeDataImp'][0]['value'],  # DC Voltage PV1 (V)
-            'DCVPV2': json['result']['deviceWapper']['realTimeDataImp'][1]['value'],  # DC Voltage PV2 (V)
-            'DCVPV3': json['result']['deviceWapper']['realTimeDataImp'][2]['value'],  # DC Voltage PV3 (V)
-            'DCVPV4': json['result']['deviceWapper']['realTimeDataImp'][3]['value'],  # DC Voltage PV4 (V)
-            'DCCUR1': json['result']['deviceWapper']['realTimeDataImp'][4]['value'],  # DC Current 1 (A)
-            'DCCUR2': json['result']['deviceWapper']['realTimeDataImp'][5]['value'],  # DC Current 2 (A)
-            'DCCUR3': json['result']['deviceWapper']['realTimeDataImp'][6]['value'],  # DC Current 3 (A)
-            'DCCUR4': json['result']['deviceWapper']['realTimeDataImp'][7]['value'],  # DC Current 4 (A)
-            'ACVOL1': json['result']['deviceWapper']['realTimeDataImp'][8]['value'],  # AC Voltage R/U/A (A)
-            'ACVOL2': json['result']['deviceWapper']['realTimeDataImp'][9]['value'],  # AC Voltage S/V/B (A)
-            'ACVOL3': json['result']['deviceWapper']['realTimeDataImp'][10]['value'],  # AC Voltage T/W/C (A)
-            'ACCUR1': json['result']['deviceWapper']['realTimeDataImp'][11]['value'],  # AC Current R/U/A (A)
-            'ACCUR2': json['result']['deviceWapper']['realTimeDataImp'][12]['value'],  # AC Current S/V/B (A)
-            'ACCUR3': json['result']['deviceWapper']['realTimeDataImp'][13]['value'],  # AC Current T/W/C (A)
-            'ACWATT': json['result']['deviceWapper']['realTimeDataImp'][14]['value'],  # AC Output Total Power (W)
-            'ACFREQ': json['result']['deviceWapper']['realTimeDataImp'][15]['value'],  # AC Output Frequency (Hz)
-            'DAYGEN': json['result']['deviceWapper']['realTimeDataImp'][16]['value'],  # Daily Generation (kWh)
-            'MONGEN': json['result']['deviceWapper']['realTimeDataImp'][17]['value'],  # Monthly Generation (kWh)
-            'ANNGEN': json['result']['deviceWapper']['realTimeDataImp'][18]['value'],  # Annual Generation (kWh)
-            'TOTGEN': json['result']['deviceWapper']['realTimeDataImp'][19]['value'],  # Total Generation (kWh)
-            'INVTMP': json['result']['deviceWapper']['realTimeDataImp'][20]['value']  # Inverter Temperature (C)
-            }
-    CheckActivity(Data['Updatetime'])
-    return Data
+    results = {}
+    for line in json['result']['deviceWapper']['realTimeDataImp']:
+        name = gindict[line['key']]
+        value = line['value']
+        results.update({name: value})
+    # Add plantname and updatetime to results
+    results.update({'Plantname': json['result']['deviceWapper']['plantName']})  # Plantname
+    results.update({'Updatetime': json['result']['deviceWapper']['updateDate']})  # Last update (epoch)
+    # Check for last upload time
+    CheckActivity(results['Updatetime'])
+    return results
 
 
 def ExportData(Data):
@@ -113,11 +120,14 @@ def PVoutput(Data):
     payload = {
         "d": t_date,
         "t": t_time,
-        "v1": Data['ANNGEN'],
+        "v1": Data['TOTGEN'],
         "v2": Data['ACWATT'],
         "v5": Data['INVTMP'],
+        "v6": Data['ACVOL1'],
         "c1": 1
     }
+    print("Data sent to PVoutput:")
+    print(payload)
     r = requests.post("https://pvoutput.org/service/r2/addstatus.jsp",
                       headers={
                           "X-Pvoutput-Apikey": pvout_apikey,
@@ -125,8 +135,10 @@ def PVoutput(Data):
                       }, data=payload)
     if r.status_code == 200:
         print("Upload successful")
+        Exit()
     else:
         print("Upload failed")
+        Exit()
 
 
 def Exit():
