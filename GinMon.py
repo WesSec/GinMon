@@ -120,7 +120,8 @@ def PVoutput(Data):
     payload = {
         "d": t_date,
         "t": t_time,
-        "v1": Data['TOTGEN'],
+        # kWh to wh
+        "v1": Data['TOTGEN'] * 1000,
         "v2": Data['ACWATT'],
         "v5": Data['INVTMP'],
         "v6": Data['ACVOL1'],
