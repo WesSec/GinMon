@@ -117,11 +117,12 @@ def PVoutput(Data):
     # Set values for PVoutput
     t_date = format(strftime('%Y%m%d'))
     t_time = format(strftime('%H:%M'))
+    # kWh to wh
+    totalwh = int(Data['TOTGEN']) * 1000
     payload = {
         "d": t_date,
         "t": t_time,
-        # kWh to wh
-        "v1": Data['TOTGEN'] * 1000,
+        "v1": totalwh,
         "v2": Data['ACWATT'],
         "v5": Data['INVTMP'],
         "v6": Data['ACVOL1'],
