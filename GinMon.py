@@ -98,8 +98,8 @@ def ParseData(rson):
             results.update({gindict[line]: d[line]})
         except:
             pass
-    d.update({'Plantname': rson['result']['deviceWapper']['plantName']})  # Plantname
-    d.update({'Updatetime': rson['result']['deviceWapper']['updateDate']})  # Last update (epoch)
+    results.update({'Plantname': rson['result']['deviceWapper']['plantName']})  # Plantname
+    results.update({'Updatetime': rson['result']['deviceWapper']['updateDate']})  # Last update (epoch)
     # Check for last upload time
     CheckActivity(d['Updatetime'])
     return results
