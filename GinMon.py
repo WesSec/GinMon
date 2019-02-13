@@ -3,9 +3,10 @@ import configparser
 import json
 import os
 import sys
-from time import strftime
 
 import requests
+
+from Exports import PVoutput
 
 # Ginlong output keys
 gindict = {"1a": "DCVPV1",
@@ -70,6 +71,35 @@ def GetData(deviceID):
     rson = r.json()
     return ParseData(rson)
 
+def ParseData(rson):
+    # Parse all the data from the Json
+    global d, data
+    invresults = {}
+    # Get data based on inverter generation
+    if generation == 3:
+        data = rson['result']['deviceWapper']['data']
+        d = json.loads(data)
+        invresults.update({'Plantname': rson['result']['paginationAjax']['data']['name']})  # Plantname
+        invresults.update({'Updatetime': rson['result']['paginationAjax']['data']['updateDate']})  # Last update (epoch)
+    elif generation == 4:
+        data = rson['result']['paginationAjax']['data'][0]['data']
+        d = json.loads(data)
+        invresults.update({'Plantname': rson['result']['deviceWapper']['plantName']})  # Plantname
+        invresults.update({'Updatetime': rson['result']['deviceWapper']['updateDate']})  # Last update (epoch)
+    else:
+        print("wrong generation entered in config (must me 3 or 4)")
+        Exit()
+    # Try to fill in all values declared in gindict
+    for line in d:
+        try:
+            invresults.update({gindict[line]: d[line]})
+        except:
+            pass
+
+    # Check for last upload time
+    CheckActivity(invresults['Updatetime'])
+    return invresults
+
 
 def CheckActivity(updatetime):
     if not os.path.isfile('lastlog.txt'):
@@ -88,35 +118,6 @@ def CheckActivity(updatetime):
             wr.close()
 
 
-def ParseData(rson):
-    # Parse all the data from the Json
-    global d, data
-    results = {}
-    # Get data based on inverter generation
-    if generation == 3:
-        data = rson['result']['deviceWapper']['data']
-        d = json.loads(data)
-        results.update({'Plantname': rson['result']['paginationAjax']['data']['name']})  # Plantname
-        results.update({'Updatetime': rson['result']['paginationAjax']['data']['updateDate']})  # Last update (epoch)
-    elif generation == 4:
-        data = rson['result']['paginationAjax']['data'][0]['data']
-        d = json.loads(data)
-        results.update({'Plantname': rson['result']['deviceWapper']['plantName']})  # Plantname
-        results.update({'Updatetime': rson['result']['deviceWapper']['updateDate']})  # Last update (epoch)
-    else:
-        print("wrong generation entered in config (must me 3 or 4)")
-        Exit()
-    for line in d:
-        try:
-            results.update({gindict[line]: d[line]})
-        except:
-            pass
-
-    # Check for last upload time
-    CheckActivity(results['Updatetime'])
-    return results
-
-
 def ExportData(Data):
     if config.getboolean('PVoutput', 'enabled'):
         PVoutput(Data)
@@ -124,41 +125,6 @@ def ExportData(Data):
         print("Data export disabled")
 
 
-def PVoutput(Data):
-    print("Uploading to PVoutput")
-    # Get values from config
-    pvout_apikey = config.get('PVoutput', 'API_key')
-    pvout_sysid = config.get('PVoutput', 'systemID')
-    # Set values for PVoutput
-    t_date = format(strftime('%Y%m%d'))
-    t_time = format(strftime('%H:%M'))
-    # kWh to wh
-    if float(Data['DAYGEN']) != 0:
-        daywh = float(Data['DAYGEN']) * 1000
-    else:
-        daywh = 0
-    payload = {
-        "d": t_date,
-        "t": t_time,
-        "v1": daywh,
-        "v2": Data['ACWATT'],
-        "v5": Data['INVTMP'],
-        "v6": Data['ACVOL1'],
-        "c1": 0
-    }
-    print("Data sent to PVoutput:")
-    print(payload)
-    r = requests.post("https://pvoutput.org/service/r2/addstatus.jsp",
-                      headers={
-                          "X-Pvoutput-Apikey": pvout_apikey,
-                          "X-Pvoutput-SystemId": pvout_sysid
-                      }, data=payload)
-    if r.status_code == 200:
-        print("Upload successful")
-        Exit()
-    else:
-        print("Upload failed")
-        Exit()
 
 
 def Exit():
@@ -193,6 +159,7 @@ print("Welcome to Ginlong monitoring tool v2 by wessel145")
 
 # Set Generation
 generation = int(config.get('Ginlong', 'generation'))
+amount_inverters = int(config.get('Ginlong', 'generation'))
 
 # Actual start commands
 InverterID = CheckLogin()

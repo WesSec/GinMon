@@ -27,7 +27,7 @@ Options:
 
 ### Features
 - Checks if new data is available on the ginglong server, script aborts when data is same as previous upload. (lastlog.txt is created for storing this data, modifying it may break the script)
-
+- Supports multiple inverters (only if 4th gen, max 3 inverters)
 ### ToDo
 - [ ] Add domoticz support
 - [ ] Add database support
