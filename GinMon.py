@@ -90,30 +90,28 @@ def CheckActivity(updatetime):
 
 def ParseData(rson):
     # Parse all the data from the Json
-    print(generation)
+    global d, data
+    results = {}
+    # Get data based on inverter generation
     if generation == 3:
         data = rson['result']['deviceWapper']['data']
+        d = json.loads(data)
+        results.update({'Plantname': rson['result']['paginationAjax']['data']['name']})  # Plantname
+        results.update({'Updatetime': rson['result']['paginationAjax']['data']['updateDate']})  # Last update (epoch)
     elif generation == 4:
         data = rson['result']['paginationAjax']['data'][0]['data']
+        d = json.loads(data)
+        results.update({'Plantname': rson['result']['deviceWapper']['plantName']})  # Plantname
+        results.update({'Updatetime': rson['result']['deviceWapper']['updateDate']})  # Last update (epoch)
     else:
         print("wrong generation entered in config (must me 3 or 4)")
         Exit()
-    d = json.loads(data)
-    results = {}
     for line in d:
         try:
             results.update({gindict[line]: d[line]})
         except:
             pass
-    if generation == 3:
-        results.update({'Plantname': rson['result']['deviceWapper']['plantName']})  # Plantname
-        results.update({'Updatetime': rson['result']['deviceWapper']['updateDate']})  # Last update (epoch)
-    elif generation == 4:
-        results.update({'Plantname': rson['result']['paginationAjax']['data']['name']})  # Plantname
-        results.update({'Updatetime': rson['result']['paginationAjax']['data']['updateDate']})  # Last update (epoch)
-    else:
-        print("wrong generation entered in config (must me 3 or 4)")
-        Exit()
+
     # Check for last upload time
     CheckActivity(results['Updatetime'])
     return results
