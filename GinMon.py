@@ -104,39 +104,35 @@ def ParseData(rson):
 
 
 def ParseMultiData(rson, inverters):
-    for i in range(inverters - 1):
-        print(i)
-        # global d, data
-        # results = {}
-        # # Get data based on inverter generation
-        # if generation == 3:
-        #     data = rson['result']['paginationAjax']['data'][i]['data']
-        #     d = json.loads(data)
-        #     results.update({'Plantname': rson['result']['deviceWapper']['plantName']})  # Plantname
-        #     results.update({'Updatetime': rson['result']['deviceWapper']['updateDate']})  # Last update (epoch)
-        # elif generation == 4:
-        #     data = rson['result']['deviceWapper']['data']
-        #     d = json.loads(data)
-        #     results.update({'Plantname': rson['result']['paginationAjax']['data']['name']})  # Plantname
-        #     results.update({'Updatetime': rson['result']['paginationAjax']['data']['updateDate']})  # Last update (epoch)
-        # else:
-        #     print("wrong generation entered in config (must be 3 or 4)")
-        #     Exit()
-        # # Try to fill in all values declared in gindict
-        # for line in d:
-        #     try:
-        #         results.update({gindict[line]: d[line]})
-        #     except:
-        #         pass
-        # # Check for last upload time
+    for i in range(inverters):
+        global d, data
+        results = {'Inverter': i + 1}
+        # Get data based on inverter generation
+        if generation == 3:
+            data = rson['result']['deviceWapper']['data']
+            d = json.loads(data)
+            results.update({'Plantname': rson['result']['deviceWapper']['plantName']})  # Plantname
+            results.update({'Updatetime': rson['result']['deviceWapper']['updateDate']})  # Last update (epoch)
+        elif generation == 4:
+            data = rson['result']['paginationAjax']['data'][i]['data']
+            d = json.loads(data)
+            results.update({'Plantname': rson['result']['paginationAjax']['data']['name']})  # Plantname
+            results.update(
+                {'Updatetime': rson['result']['paginationAjax']['data']['updateDate']})  # Last update (epoch)
+        else:
+            print("wrong generation entered in config (must be 3 or 4)")
+            Exit()
+        # Try to fill in all values declared in gindict
+        for line in d:
+            try:
+                results.update({gindict[line]: d[line]})
+            except:
+                pass
+        # Check for last upload time
         i += 1
-        # print(i)
-        # results = {'Inverter': i}
-        # CheckActivity(results['Updatetime'])
-        # ExportData(results, i)
-
-
-
+        print(i)
+        CheckActivity(results['Updatetime'])
+        ExportData(results, i)
 
 
 def CheckActivity(updatetime):
@@ -167,6 +163,7 @@ def Exit():
     print("Bye!!")
     sys.exit()
 
+
 # Base URLs and
 BaseURL = "http://m.ginlong.com"
 
@@ -195,7 +192,7 @@ if __name__ == "__main__":
 
     # Set Generation
     generation = int(config.get('Ginlong', 'generation'))
-    amount_inverters = int(config.get('Ginlong', 'generation'))
+    amount_inverters = int(config.get('Ginlong', 'Amount_inverters'))
 
     # Actual start commands
     InverterID = CheckLogin()
