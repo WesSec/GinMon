@@ -94,7 +94,7 @@ def ParseData(rson):
     if generation == 3:
         data = rson['result']['deviceWapper']['data']
     elif generation == 4:
-        data = rson['result']['paginationAjax']['data']['data']
+        data = rson['result']['paginationAjax']['data'][0]['data']
     else:
         print("wrong generation entered in config (must me 3 or 4)")
         Exit()
