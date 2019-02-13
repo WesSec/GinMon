@@ -6,7 +6,7 @@ import sys
 
 import requests
 
-from Exports import PVoutput
+import Exports
 
 # Ginlong output keys
 gindict = {"1a": "DCVPV1",
@@ -69,7 +69,7 @@ def GetData(deviceID):
     cookies = {'language': '2'}
     r = session.get(url, params=params, cookies=cookies)
     rson = r.json()
-    ParseData(rson)
+    ParseMultiData(rson, amount_inverters)
 
 
 def ParseData(rson):
@@ -103,6 +103,42 @@ def ParseData(rson):
     return invresults
 
 
+def ParseMultiData(rson, inverters):
+    for i in range(inverters - 1):
+        print(i)
+        # global d, data
+        # results = {}
+        # # Get data based on inverter generation
+        # if generation == 3:
+        #     data = rson['result']['paginationAjax']['data'][i]['data']
+        #     d = json.loads(data)
+        #     results.update({'Plantname': rson['result']['deviceWapper']['plantName']})  # Plantname
+        #     results.update({'Updatetime': rson['result']['deviceWapper']['updateDate']})  # Last update (epoch)
+        # elif generation == 4:
+        #     data = rson['result']['deviceWapper']['data']
+        #     d = json.loads(data)
+        #     results.update({'Plantname': rson['result']['paginationAjax']['data']['name']})  # Plantname
+        #     results.update({'Updatetime': rson['result']['paginationAjax']['data']['updateDate']})  # Last update (epoch)
+        # else:
+        #     print("wrong generation entered in config (must be 3 or 4)")
+        #     Exit()
+        # # Try to fill in all values declared in gindict
+        # for line in d:
+        #     try:
+        #         results.update({gindict[line]: d[line]})
+        #     except:
+        #         pass
+        # # Check for last upload time
+        i += 1
+        # print(i)
+        # results = {'Inverter': i}
+        # CheckActivity(results['Updatetime'])
+        # ExportData(results, i)
+
+
+
+
+
 def CheckActivity(updatetime):
     if not os.path.isfile('lastlog.txt'):
         wr = open("lastlog.txt", "w+")
@@ -120,9 +156,9 @@ def CheckActivity(updatetime):
             wr.close()
 
 
-def ExportData(Data):
+def ExportData(Data, i):
     if config.getboolean('PVoutput', 'enabled'):
-        PVoutput(Data)
+        Exports.PVoutput(Data, i)
     else:
         print("Data export disabled")
 
@@ -130,7 +166,6 @@ def ExportData(Data):
 def Exit():
     print("Bye!!")
     sys.exit()
-
 
 # Base URLs and
 BaseURL = "http://m.ginlong.com"
@@ -155,12 +190,13 @@ if args.config:
 else:
     config.read(prog_path + "/config.ini")
 
-print("Welcome to Ginlong monitoring tool v2 by wessel145")
+if __name__ == "__main__":
+    print("Welcome to Ginlong monitoring tool v2 by wessel145")
 
-# Set Generation
-generation = int(config.get('Ginlong', 'generation'))
-amount_inverters = int(config.get('Ginlong', 'generation'))
+    # Set Generation
+    generation = int(config.get('Ginlong', 'generation'))
+    amount_inverters = int(config.get('Ginlong', 'generation'))
 
-# Actual start commands
-InverterID = CheckLogin()
-GetData(InverterID)
+    # Actual start commands
+    InverterID = CheckLogin()
+    GetData(InverterID)
