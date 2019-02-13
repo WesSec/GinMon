@@ -1,5 +1,6 @@
 import argparse
 import configparser
+import json
 import os
 import sys
 from time import strftime
@@ -87,18 +88,20 @@ def CheckActivity(updatetime):
             wr.close()
 
 
-def ParseData(json):
+def ParseData(rson):
     # Parse all the data from the Json
+    results = rson['result']['deviceWapper']['data']
+    d = json.loads(results)
     results = {}
-    for line in json['result']['deviceWapper']['realTimeDataImp']:
-        name = gindict[line['key']]
-        value = line['value']
-        results.update({name: value})
-    # Add plantname and updatetime to results
-    results.update({'Plantname': json['result']['deviceWapper']['plantName']})  # Plantname
-    results.update({'Updatetime': json['result']['deviceWapper']['updateDate']})  # Last update (epoch)
+    for line in d:
+        try:
+            results.update({gindict[line]: d[line]})
+        except:
+            pass
+    d.update({'Plantname': rson['result']['deviceWapper']['plantName']})  # Plantname
+    d.update({'Updatetime': rson['result']['deviceWapper']['updateDate']})  # Last update (epoch)
     # Check for last upload time
-    CheckActivity(results['Updatetime'])
+    CheckActivity(d['Updatetime'])
     return results
 
 
@@ -118,7 +121,10 @@ def PVoutput(Data):
     t_date = format(strftime('%Y%m%d'))
     t_time = format(strftime('%H:%M'))
     # kWh to wh
-    daywh = float(Data['DAYGEN']) * 1000
+    if float(Data['DAYGEN']) != 0:
+        daywh = float(Data['DAYGEN']) * 1000
+    else:
+        daywh = 0
     payload = {
         "d": t_date,
         "t": t_time,
