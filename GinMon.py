@@ -69,7 +69,8 @@ def GetData(deviceID):
     cookies = {'language': '2'}
     r = session.get(url, params=params, cookies=cookies)
     rson = r.json()
-    return ParseData(rson)
+    ParseData(rson)
+
 
 def ParseData(rson):
     # Parse all the data from the Json
@@ -77,15 +78,16 @@ def ParseData(rson):
     invresults = {}
     # Get data based on inverter generation
     if generation == 3:
-        data = rson['result']['deviceWapper']['data']
-        d = json.loads(data)
-        invresults.update({'Plantname': rson['result']['paginationAjax']['data']['name']})  # Plantname
-        invresults.update({'Updatetime': rson['result']['paginationAjax']['data']['updateDate']})  # Last update (epoch)
-    elif generation == 4:
         data = rson['result']['paginationAjax']['data'][0]['data']
         d = json.loads(data)
         invresults.update({'Plantname': rson['result']['deviceWapper']['plantName']})  # Plantname
         invresults.update({'Updatetime': rson['result']['deviceWapper']['updateDate']})  # Last update (epoch)
+    if generation == 4:
+        data = rson['result']['deviceWapper']['data']
+        d = json.loads(data)
+        invresults.update({'Plantname': rson['result']['paginationAjax']['data']['name']})  # Plantname
+        invresults.update({'Updatetime': rson['result']['paginationAjax']['data']['updateDate']})  # Last update (epoch)
+
     else:
         print("wrong generation entered in config (must me 3 or 4)")
         Exit()
@@ -125,8 +127,6 @@ def ExportData(Data):
         print("Data export disabled")
 
 
-
-
 def Exit():
     print("Bye!!")
     sys.exit()
@@ -163,5 +163,4 @@ amount_inverters = int(config.get('Ginlong', 'generation'))
 
 # Actual start commands
 InverterID = CheckLogin()
-Data = GetData(InverterID)
-ExportData(Data)
+GetData(InverterID)
