@@ -90,18 +90,32 @@ def CheckActivity(updatetime):
 
 def ParseData(rson):
     # Parse all the data from the Json
-    results = rson['result']['deviceWapper']['data']
-    d = json.loads(results)
+    print(generation)
+    if generation == 3:
+        data = rson['result']['deviceWapper']['data']
+    elif generation == 4:
+        data = rson['result']['paginationAjax']['data']['data']
+    else:
+        print("wrong generation entered in config (must me 3 or 4)")
+        Exit()
+    d = json.loads(data)
     results = {}
     for line in d:
         try:
             results.update({gindict[line]: d[line]})
         except:
             pass
-    results.update({'Plantname': rson['result']['deviceWapper']['plantName']})  # Plantname
-    results.update({'Updatetime': rson['result']['deviceWapper']['updateDate']})  # Last update (epoch)
+    if generation == 3:
+        results.update({'Plantname': rson['result']['deviceWapper']['plantName']})  # Plantname
+        results.update({'Updatetime': rson['result']['deviceWapper']['updateDate']})  # Last update (epoch)
+    elif generation == 4:
+        results.update({'Plantname': rson['result']['paginationAjax']['data']['name']})  # Plantname
+        results.update({'Updatetime': rson['result']['paginationAjax']['data']['updateDate']})  # Last update (epoch)
+    else:
+        print("wrong generation entered in config (must me 3 or 4)")
+        Exit()
     # Check for last upload time
-    CheckActivity(d['Updatetime'])
+    CheckActivity(results['Updatetime'])
     return results
 
 
@@ -178,6 +192,9 @@ else:
     config.read(prog_path + "/config.ini")
 
 print("Welcome to Ginlong monitoring tool v2 by wessel145")
+
+# Set Generation
+generation = int(config.get('Ginlong', 'generation'))
 
 # Actual start commands
 InverterID = CheckLogin()
