@@ -72,37 +72,6 @@ def GetData(deviceID):
     ParseMultiData(rson, amount_inverters)
 
 
-def ParseData(rson):
-    # Parse all the data from the Json
-    global d, data
-    invresults = {}
-    # Get data based on inverter generation
-    if generation == 3:
-        data = rson['result']['paginationAjax']['data'][0]['data']
-        d = json.loads(data)
-        invresults.update({'Plantname': rson['result']['deviceWapper']['plantName']})  # Plantname
-        invresults.update({'Updatetime': rson['result']['deviceWapper']['updateDate']})  # Last update (epoch)
-    if generation == 4:
-        data = rson['result']['deviceWapper']['data']
-        d = json.loads(data)
-        invresults.update({'Plantname': rson['result']['paginationAjax']['data']['name']})  # Plantname
-        invresults.update({'Updatetime': rson['result']['paginationAjax']['data']['updateDate']})  # Last update (epoch)
-
-    else:
-        print("wrong generation entered in config (must me 3 or 4)")
-        Exit()
-    # Try to fill in all values declared in gindict
-    for line in d:
-        try:
-            invresults.update({gindict[line]: d[line]})
-        except:
-            pass
-
-    # Check for last upload time
-    CheckActivity(invresults['Updatetime'])
-    return invresults
-
-
 def ParseMultiData(rson, inverters):
     for i in range(inverters):
         global d, data
@@ -130,7 +99,6 @@ def ParseMultiData(rson, inverters):
                 pass
         # Check for last upload time
         i += 1
-        print(i)
         CheckActivity(results['Updatetime'])
         ExportData(results, i)
 
