@@ -30,7 +30,40 @@ Options:
 - Supports multiple inverters (only if 4th gen, max 3 inverters)
 ### ToDo
 - [ ] Add domoticz support
-- [ ] Add database support
+- [x] Add database support
 - [x] Log more data
 - [x] Save timestamp and only log new data
 - [ ] Setup script to retrieve deviceID for inverter
+
+
+#### MariaDB table create statement
+```
+CREATE TABLE `Solaroutput` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `DCVPV1` float DEFAULT NULL,
+  `DCVPV2` float DEFAULT NULL,
+  `DCVPV3` float DEFAULT NULL,
+  `DCVPV4` float DEFAULT NULL,
+  `DCCUR1` float DEFAULT NULL,
+  `DCCUR2` float DEFAULT NULL,
+  `DCCUR3` float DEFAULT NULL,
+  `DCCUR4` float DEFAULT NULL,
+  `ACVOL1` float DEFAULT NULL,
+  `ACVOL2` float DEFAULT NULL,
+  `ACVOL3` float DEFAULT NULL,
+  `ACCUR1` float DEFAULT NULL,
+  `ACCUR2` float DEFAULT NULL,
+  `ACCUR3` float DEFAULT NULL,
+  `ACWATT` float DEFAULT NULL,
+  `ACFREQ` float DEFAULT NULL,
+  `DAYGEN` float DEFAULT NULL,
+  `MONGEN` float DEFAULT NULL,
+  `ANNGEN` float DEFAULT NULL,
+  `TOTGEN` float DEFAULT NULL,
+  `INVTMP` float DEFAULT NULL,
+  `Updatetime` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`log_id`)
+) COMMENT='outputs from m.ginglong';
+```
+
+

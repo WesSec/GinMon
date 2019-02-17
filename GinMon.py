@@ -69,7 +69,9 @@ def GetData(deviceID):
     cookies = {'language': '2'}
     r = session.get(url, params=params, cookies=cookies)
     rson = r.json()
-    ParseMultiData(rson, amount_inverters)
+    dataset = {}
+    dataset = ParseMultiData(rson, amount_inverters)
+    return dataset
 
 
 def ParseMultiData(rson, inverters):
@@ -100,7 +102,7 @@ def ParseMultiData(rson, inverters):
         # Check for last upload time
         i += 1
         CheckActivity(results['Updatetime'])
-        ExportData(results, i)
+        return results
 
 
 def CheckActivity(updatetime):
@@ -124,8 +126,16 @@ def ExportData(Data, i):
     if config.getboolean('PVoutput', 'enabled'):
         Exports.PVoutput(Data, i)
     else:
-        print("Data export disabled")
-
+        print("Data export to PVoutput disabled")
+    if config.getboolean('MariaDB', 'enabled'):
+        ip = config.get('MariaDB', 'serverip')
+        db = config.get('MariaDB', 'database')
+        table = config.get('MariaDB', 'table')
+        username = config.get('MariaDB', 'username')
+        password = config.get('MariaDB', 'password')
+        Exports.mariaInsert(ip, Data, db, table, username, password)
+    else:
+        print("Data export to MariaDB disabled")
 
 def Exit():
     print("Bye!!")
@@ -164,4 +174,6 @@ if __name__ == "__main__":
 
     # Actual start commands
     InverterID = CheckLogin()
-    GetData(InverterID)
+    Data = GetData(InverterID)
+    ExportData(Data, 1)
+    Exit()
