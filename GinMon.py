@@ -69,7 +69,6 @@ def GetData(deviceID):
     cookies = {'language': '2'}
     r = session.get(url, params=params, cookies=cookies)
     rson = r.json()
-    dataset = {}
     dataset = ParseMultiData(rson, amount_inverters)
     return dataset
 
@@ -87,9 +86,9 @@ def ParseMultiData(rson, inverters):
         elif generation == 4:
             data = rson['result']['paginationAjax']['data'][i]['data']
             d = json.loads(data)
-            results.update({'Plantname': rson['result']['paginationAjax']['data']['name']})  # Plantname
+            results.update({'Plantname': rson['result']['plantInfo']['name']})  # Plantname
             results.update(
-                {'Updatetime': rson['result']['paginationAjax']['data']['updateDate']})  # Last update (epoch)
+                {'Updatetime': rson['result']['paginationAjax']['data'][0]['updateDate']})  # Last update (epoch)
         else:
             print("wrong generation entered in config (must be 3 or 4)")
             Exit()
@@ -102,6 +101,8 @@ def ParseMultiData(rson, inverters):
         # Check for last upload time
         i += 1
         CheckActivity(results['Updatetime'])
+        # Print results (for debugging)
+        # print(results)
         return results
 
 
